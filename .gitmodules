@@ -1,0 +1,33 @@
+[submodule "netstack/modules/twingate-helm-deploy"]
+	path = netstack/modules/twingate-helm-deploy
+	url = git@github.com:hyperpolymath/twingate-helm-deploy.git
+[submodule "netstack/modules/zerotier-k8s-link"]
+	path = netstack/modules/zerotier-k8s-link
+	url = git@github.com:hyperpolymath/zerotier-k8s-link.git
+[submodule "netstack/modules/ipfs-overlay"]
+	path = netstack/modules/ipfs-overlay
+	url = git@github.com:hyperpolymath/ipfs-overlay.git
+[submodule "netstack/modules/ipv6-site-enforcer"]
+	path = netstack/modules/ipv6-site-enforcer
+	url = git@github.com:hyperpolymath/ipv6-site-enforcer.git
+[submodule "netstack/modules/hesiod-dns-map"]
+	path = netstack/modules/hesiod-dns-map
+	url = git@github.com:hyperpolymath/hesiod-dns-map.git
+[submodule "netstack/modules/bgp-backbone-lab"]
+	path = netstack/modules/bgp-backbone-lab
+	url = git@github.com:hyperpolymath/bgp-backbone-lab.git
+[submodule "netstack/modules/flatracoon-os"]
+	path = netstack/modules/flatracoon-os
+	url = git@github.com:hyperpolymath/flatracoon-os.git
+[submodule "netstack/modules/network-dashboard"]
+	path = netstack/modules/network-dashboard
+	url = git@github.com:hyperpolymath/network-dashboard.git
+[submodule "netstack/modules/poly-k8s-mcp"]
+	path = netstack/modules/poly-k8s-mcp
+	url = git@github.com:hyperpolymath/poly-k8s-mcp.git
+[submodule "netstack/modules/poly-secret-mcp"]
+	path = netstack/modules/poly-secret-mcp
+	url = git@github.com:hyperpolymath/poly-secret-mcp.git
+[submodule "netstack/modules/poly-observability-mcp"]
+	path = netstack/modules/poly-observability-mcp
+	url = git@github.com:hyperpolymath/poly-observability-mcp.git
