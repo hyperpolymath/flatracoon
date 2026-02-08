@@ -1,0 +1,33 @@
+[submodule "modules/twingate-helm-deploy"]
+	path = modules/twingate-helm-deploy
+	url = https://github.com/hyperpolymath/twingate-helm-deploy.git
+[submodule "modules/zerotier-k8s-link"]
+	path = modules/zerotier-k8s-link
+	url = https://github.com/hyperpolymath/zerotier-k8s-link.git
+[submodule "modules/ipfs-overlay"]
+	path = modules/ipfs-overlay
+	url = https://github.com/hyperpolymath/ipfs-overlay.git
+[submodule "modules/ipv6-site-enforcer"]
+	path = modules/ipv6-site-enforcer
+	url = https://github.com/hyperpolymath/ipv6-site-enforcer.git
+[submodule "modules/hesiod-dns-map"]
+	path = modules/hesiod-dns-map
+	url = https://github.com/hyperpolymath/hesiod-dns-map.git
+[submodule "modules/bgp-backbone-lab"]
+	path = modules/bgp-backbone-lab
+	url = https://github.com/hyperpolymath/bgp-backbone-lab.git
+[submodule "modules/flatracoon-os"]
+	path = modules/flatracoon-os
+	url = https://github.com/hyperpolymath/flatracoon-os.git
+[submodule "modules/network-dashboard"]
+	path = modules/network-dashboard
+	url = https://github.com/hyperpolymath/network-dashboard.git
+[submodule "modules/poly-k8s-mcp"]
+	path = modules/poly-k8s-mcp
+	url = https://github.com/hyperpolymath/poly-k8s-mcp.git
+[submodule "modules/poly-secret-mcp"]
+	path = modules/poly-secret-mcp
+	url = https://github.com/hyperpolymath/poly-secret-mcp.git
+[submodule "modules/poly-observability-mcp"]
+	path = modules/poly-observability-mcp
+	url = https://github.com/hyperpolymath/poly-observability-mcp.git

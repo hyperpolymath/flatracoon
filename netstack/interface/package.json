@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "rescript": "^11.1.4",
+    "@rescript/core": "^1.6.1"
+  }
+}

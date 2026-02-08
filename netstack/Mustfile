@@ -1,0 +1,165 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2025 Hyperpolymath <hyperpolymath@proton.me>
+#
+# FlatRacoon Network Stack - Mustfile
+# Type-safe, contract-driven deployment orchestration
+# Like Justfile for Just, Mustfile for Must (powered by Nickel)
+
+let MustSpec = {
+  version = "1.0.0",
+  name = "flatracoon-netstack",
+  description = "Modular, declarative network stack orchestration",
+}
+in
+
+let Environments = {
+  development = {
+    kubernetes_context = "minikube",
+    twingate_network = "dev-network",
+    zerotier_network_id = "dev-zt-network",
+    ipfs_bootstrap = [],
+    ipv6_prefix = "fd00:flatracoon:dev::/48",
+  },
+
+  staging = {
+    kubernetes_context = "staging-cluster",
+    twingate_network = "staging-network",
+    zerotier_network_id = "staging-zt-network",
+    ipfs_bootstrap = ["ipfs-bootstrap-staging.internal"],
+    ipv6_prefix = "fd00:flatracoon:staging::/48",
+  },
+
+  production = {
+    kubernetes_context = "production-cluster",
+    twingate_network = "prod-network",
+    zerotier_network_id = "prod-zt-network",
+    ipfs_bootstrap = [
+      "ipfs-bootstrap-1.flatracoon.net",
+      "ipfs-bootstrap-2.flatracoon.net",
+    ],
+    ipv6_prefix = "2001:db8:flatracoon::/48",
+  },
+}
+in
+
+let Modules = {
+  twingate = {
+    name = "twingate-helm-deploy",
+    layer = "access",
+    path = "modules/twingate-helm-deploy",
+    deploy_command = "just deploy",
+    health_endpoint = "/health",
+    requires = ["kubernetes"],
+  },
+
+  zerotier = {
+    name = "zerotier-k8s-link",
+    layer = "overlay",
+    path = "modules/zerotier-k8s-link",
+    deploy_command = "just deploy",
+    health_endpoint = "/zerotier/health",
+    requires = ["kubernetes"],
+  },
+
+  ipfs = {
+    name = "ipfs-overlay",
+    layer = "storage",
+    path = "modules/ipfs-overlay",
+    deploy_command = "just deploy",
+    health_endpoint = "/ipfs/health",
+    requires = ["kubernetes", "zerotier"],
+  },
+
+  ipv6 = {
+    name = "ipv6-site-enforcer",
+    layer = "network",
+    path = "modules/ipv6-site-enforcer",
+    deploy_command = "just deploy",
+    health_endpoint = "/ipv6/health",
+    requires = ["kubernetes"],
+  },
+
+  hesiod = {
+    name = "hesiod-dns-map",
+    layer = "naming",
+    path = "modules/hesiod-dns-map",
+    deploy_command = "just deploy",
+    health_endpoint = "/dns/health",
+    requires = ["kubernetes"],
+  },
+
+  bgp = {
+    name = "bgp-backbone-lab",
+    layer = "network",
+    path = "modules/bgp-backbone-lab",
+    deploy_command = "just deploy",
+    health_endpoint = null,  # Lab environment, no runtime health
+    requires = ["containerlab"],
+  },
+
+  os = {
+    name = "flatracoon-os",
+    layer = "platform",
+    path = "modules/flatracoon-os",
+    deploy_command = "just build",
+    health_endpoint = null,  # OS image, not a service
+    requires = [],
+  },
+
+  dashboard = {
+    name = "network-dashboard",
+    layer = "observability",
+    path = "modules/network-dashboard",
+    deploy_command = "just deploy",
+    health_endpoint = "/health",
+    requires = ["elixir", "prometheus"],
+  },
+}
+in
+
+let MCPIntegrations = {
+  kubernetes = {
+    name = "poly-k8s-mcp",
+    path = "modules/poly-k8s-mcp",
+    provides = ["kubectl", "helm", "kustomize"],
+  },
+
+  secrets = {
+    name = "poly-secret-mcp",
+    path = "modules/poly-secret-mcp",
+    provides = ["vault", "sops"],
+  },
+
+  observability = {
+    name = "poly-observability-mcp",
+    path = "modules/poly-observability-mcp",
+    provides = ["prometheus", "grafana", "loki", "jaeger"],
+  },
+}
+in
+
+let DeploymentOrder = [
+  "twingate",
+  "zerotier",
+  "ipfs",
+  "ipv6",
+  "hesiod",
+  "dashboard",
+]
+in
+
+let HealthChecks = {
+  timeout_seconds = 30,
+  retry_count = 3,
+  retry_delay_seconds = 5,
+}
+in
+
+{
+  spec = MustSpec,
+  environments = Environments,
+  modules = Modules,
+  mcp_integrations = MCPIntegrations,
+  deployment_order = DeploymentOrder,
+  health_checks = HealthChecks,
+}

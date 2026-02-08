@@ -1,0 +1,12 @@
+# GNAT build artifacts
+obj/
+bin/
+*.o
+*.ali
+*.gcda
+*.gcno
+
+# Editor files
+*~
+*.swp
+.DS_Store

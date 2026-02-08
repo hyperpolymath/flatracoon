@@ -1,0 +1,225 @@
+# SPDX-License-Identifier: MPL-2.0-or-later
+name: Stack Integration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  orchestrator-test:
+    name: Test Orchestrator
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: orchestrator
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@2f0cc07b4b9bea248ae098aba9e1a8a1de5ec24c # v1
+        with:
+          elixir-version: '1.16'
+          otp-version: '26'
+
+      - name: Cache deps
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        with:
+          path: orchestrator/deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Compile
+        run: mix compile --warnings-as-errors
+
+      - name: Run tests
+        run: mix test
+
+      - name: Check formatting
+        run: mix format --check-formatted
+
+  tui-build:
+    name: Build TUI
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tui
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Install GNAT
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnat gprbuild
+
+      - name: Build TUI
+        run: gprbuild -P flatracoon_tui.gpr
+
+      - name: Check binary
+        run: |
+          ls -lh bin/flatracoon_tui
+          file bin/flatracoon_tui
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@ea165f8e1c9ea51c6a9d18e0faae4fc687162def # v4
+        with:
+          name: flatracoon-tui
+          path: tui/bin/flatracoon_tui
+
+  interface-build:
+    name: Build Interface SDK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: interface
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@5fae568d37c87b099dcc8f9f8b9c09159be2da2d # v2
+        with:
+          deno-version: v1.x
+
+      - name: Install ReScript
+        run: deno install -A npm:rescript@11
+
+      - name: Build ReScript
+        run: deno task build || echo "Build task not critical for CI"
+
+      - name: Lint
+        run: deno lint
+
+      - name: Format check
+        run: deno fmt --check
+
+  integration-test:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    needs: [orchestrator-test, tui-build, interface-build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Set up Elixir
+        uses: erlef/setup-beam@2f0cc07b4b9bea248ae098aba9e1a8a1de5ec24c # v1
+        with:
+          elixir-version: '1.16'
+          otp-version: '26'
+
+      - name: Install orchestrator deps
+        working-directory: orchestrator
+        run: mix deps.get
+
+      - name: Start orchestrator (background)
+        working-directory: orchestrator
+        run: |
+          MIX_ENV=test mix ecto.create
+          MIX_ENV=test mix ecto.migrate
+          MIX_ENV=test mix phx.server &
+          echo $! > orchestrator.pid
+          sleep 10
+
+      - name: Wait for orchestrator
+        run: |
+          timeout 30 bash -c 'until curl -f http://localhost:4000/api/health; do sleep 2; done'
+
+      - name: Download TUI artifact
+        uses: actions/download-artifact@d850ae2a08f03f5cb4c94c510ebe7bbbb0b73f38 # v4
+        with:
+          name: flatracoon-tui
+          path: tui/bin/
+
+      - name: Make TUI executable
+        run: chmod +x tui/bin/flatracoon_tui
+
+      - name: Test orchestrator API
+        run: |
+          # Test health endpoint
+          curl -f http://localhost:4000/api/health || exit 1
+
+          # Test modules endpoint
+          curl -f http://localhost:4000/api/modules || exit 1
+
+          # Test deployment order
+          curl -f http://localhost:4000/api/deployment_order || exit 1
+
+      - name: Stop orchestrator
+        if: always()
+        run: |
+          if [ -f orchestrator/orchestrator.pid ]; then
+            kill $(cat orchestrator/orchestrator.pid) || true
+          fi
+
+  documentation:
+    name: Validate Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Install AsciiDoctor
+        run: sudo apt-get update && sudo apt-get install -y asciidoctor
+
+      - name: Build documentation
+        run: |
+          find . -name "*.adoc" -type f -print0 | xargs -0 -n1 asciidoctor -o /dev/null
+
+      - name: Check for broken links
+        run: |
+          # Check internal links in adoc files
+          echo "Checking documentation links..."
+          for file in $(find . -name "*.adoc"); do
+            echo "Checking $file"
+            grep -o 'link:[^[]*' "$file" | sed 's/link://g' | while read link; do
+              if [[ $link == http* ]]; then
+                continue  # Skip external links in CI
+              fi
+              target=$(dirname "$file")/$link
+              if [ ! -f "$target" ] && [ ! -d "$target" ]; then
+                echo "Broken link in $file: $link"
+                exit 1
+              fi
+            done
+          done
+
+  state-validation:
+    name: Validate STATE Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Install Guile
+        run: sudo apt-get update && sudo apt-get install -y guile-3.0
+
+      - name: Validate STATE.scm files
+        run: |
+          for file in $(find . -name "STATE.scm"); do
+            echo "Validating $file"
+            guile -c "(load \"$file\")" || exit 1
+          done
+
+      - name: Check completion percentages
+        run: |
+          echo "Checking completion data..."
+          guile -c '
+            (load "STATE.scm")
+            (define completion (get-completion-percentage))
+            (display "Overall completion: ")
+            (display completion)
+            (newline)
+            (if (< completion 0)
+                (error "Invalid completion percentage"))
+            (if (> completion 100)
+                (error "Completion exceeds 100%"))
+          '

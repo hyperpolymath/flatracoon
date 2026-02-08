@@ -1,0 +1,92 @@
+# SPDX-License-Identifier: MPL-2.0-or-later
+# SPDX-FileCopyrightText: 2025 Hyperpolymath <hyperpolymath@proton.me>
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions: read-all
+
+jobs:
+  validate-configs:
+    name: Validate Nickel Configurations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          submodules: recursive
+
+      - name: Install Nickel
+        run: |
+          curl -sSL https://github.com/tweag/nickel/releases/latest/download/nickel-x86_64-linux -o nickel
+          chmod +x nickel
+          sudo mv nickel /usr/local/bin/
+
+      - name: Validate configurations
+        run: |
+          nickel export configs/base.ncl > /dev/null
+          nickel export configs/modules.ncl > /dev/null
+          nickel export configs/environments.ncl > /dev/null
+          echo "✓ All Nickel configurations valid"
+
+  lint-spdx:
+    name: Validate SPDX Headers
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+
+      - name: Check SPDX headers
+        run: |
+          missing=0
+          for file in $(find . -type f \( -name "*.ncl" -o -name "*.ex" -o -name "*.exs" -o -name "*.res" -o -name "*.ada" -o -name "*.adb" -o -name "*.ads" -o -name "*.sh" \) -not -path "./.git/*" -not -path "./modules/*"); do
+            if ! head -5 "$file" | grep -q "SPDX-License-Identifier"; then
+              echo "Missing SPDX header: $file"
+              missing=$((missing + 1))
+            fi
+          done
+          if [ $missing -gt 0 ]; then
+            echo "::error::$missing files missing SPDX headers"
+            exit 1
+          fi
+          echo "✓ All files have SPDX headers"
+
+  lint-shell:
+    name: Lint Shell Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+
+      - name: Run ShellCheck
+        run: |
+          find . -name "*.sh" -not -path "./.git/*" -not -path "./modules/*" -exec shellcheck {} \;
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+
+      - name: Run Trufflehog
+        uses: trufflesecurity/trufflehog@8a8ef8526528d8a4ff3e2c90be08e25ef8efbd9b # v3
+        with:
+          extra_args: --only-verified
+
+  check-links:
+    name: Check Documentation Links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@v2.7.0
+        with:
+          args: --verbose --no-progress '**/*.md' '**/*.adoc'
+          fail: true

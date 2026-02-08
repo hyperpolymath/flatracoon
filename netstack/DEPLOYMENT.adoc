@@ -1,0 +1,454 @@
+// SPDX-License-Identifier: MPL-2.0-or-later
+= FlatRacoon Network Stack - Deployment Guide
+:toc: macro
+:toclevels: 3
+
+Complete guide to deploying the FlatRacoon Network Stack.
+
+toc::[]
+
+== Prerequisites
+
+=== System Requirements
+
+**Orchestrator (Phoenix/Elixir):**
+
+* Erlang/OTP 26+
+* Elixir 1.16+
+* PostgreSQL 16+ (for production)
+* 2GB RAM minimum
+
+**TUI (Ada/SPARK):**
+
+* GNAT Ada 2022
+* 100MB disk space
+* Linux, macOS, or Windows with GNAT
+
+**Interface SDK (Deno/ReScript):**
+
+* Deno 1.40+
+* ReScript compiler
+* Node.js 20+ (for build tools)
+
+**Kubernetes Cluster:**
+
+* Kubernetes 1.28+
+* kubectl configured
+* Helm 3.12+
+
+=== Network Components
+
+All network components must be deployed before starting the orchestrator:
+
+* **ZeroTier** - Overlay network (zerotier-k8s-link)
+* **Twingate** - Zero-trust access (twingate-helm-deploy)
+* **IPFS** - Content-addressed storage (ipfs-overlay)
+
+== Deployment Steps
+
+=== 1. Deploy Network Layer
+
+==== ZeroTier Overlay
+
+[source,bash]
+----
+# Deploy ZeroTier DaemonSet
+kubectl apply -f https://github.com/hyperpolymath/zerotier-k8s-link/releases/latest/download/zerotier-daemonset.yaml
+
+# Configure network ID
+kubectl create secret generic zerotier-network \
+  --from-literal=network-id=YOUR_NETWORK_ID \
+  -n zerotier-system
+
+# Verify
+kubectl get pods -n zerotier-system
+kubectl logs -n zerotier-system -l app=zerotier
+----
+
+==== Twingate Access Layer
+
+[source,bash]
+----
+# Add Helm repo
+helm repo add twingate https://twingate.github.io/helm-charts
+helm repo update
+
+# Deploy connectors
+helm install twingate-connector twingate/connector \
+  --namespace twingate-system \
+  --create-namespace \
+  --set connector.network=YOUR_NETWORK \
+  --set connector.accessToken=YOUR_TOKEN \
+  --set connector.refreshToken=YOUR_REFRESH_TOKEN
+
+# Verify
+kubectl get pods -n twingate-system
+----
+
+==== IPFS Storage Layer
+
+[source,bash]
+----
+# Create namespace
+kubectl apply -f https://github.com/hyperpolymath/ipfs-overlay/releases/latest/download/namespace.yaml
+
+# Generate swarm key
+./scripts/generate-swarm-key.sh
+
+# Create secret
+kubectl create secret generic ipfs-swarm-key \
+  --from-file=swarm.key \
+  -n ipfs-system
+
+# Deploy IPFS
+kubectl apply -f https://github.com/hyperpolymath/ipfs-overlay/releases/latest/download/statefulset.yaml
+kubectl apply -f https://github.com/hyperpolymath/ipfs-overlay/releases/latest/download/services.yaml
+
+# Verify
+kubectl get pods -n ipfs-system
+kubectl exec -n ipfs-system ipfs-0 -- ipfs swarm peers
+----
+
+=== 2. Deploy Orchestrator
+
+[source,bash]
+----
+cd orchestrator
+
+# Install dependencies
+mix deps.get
+
+# Create database
+mix ecto.create
+mix ecto.migrate
+
+# Configure environment
+export ORCHESTRATOR_PORT=4000
+export ORCHESTRATOR_HOST=0.0.0.0
+export DATABASE_URL=ecto://user:pass@localhost/flatracoon_prod
+export SECRET_KEY_BASE=$(mix phx.gen.secret)
+
+# Build release
+MIX_ENV=prod mix release
+
+# Run orchestrator
+_build/prod/rel/flatracoon_orchestrator/bin/flatracoon_orchestrator start
+----
+
+==== Orchestrator as Systemd Service
+
+[source,ini]
+----
+# /etc/systemd/system/flatracoon-orchestrator.service
+[Unit]
+Description=FlatRacoon Orchestrator
+After=network.target postgresql.service
+
+[Service]
+Type=forking
+User=flatracoon
+WorkingDirectory=/opt/flatracoon/orchestrator
+Environment="PORT=4000"
+Environment="MIX_ENV=prod"
+ExecStart=/opt/flatracoon/orchestrator/bin/flatracoon_orchestrator start
+ExecStop=/opt/flatracoon/orchestrator/bin/flatracoon_orchestrator stop
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+----
+
+[source,bash]
+----
+sudo systemctl daemon-reload
+sudo systemctl enable flatracoon-orchestrator
+sudo systemctl start flatracoon-orchestrator
+sudo systemctl status flatracoon-orchestrator
+----
+
+=== 3. Build and Deploy TUI
+
+[source,bash]
+----
+cd tui
+
+# Build
+gprbuild -P flatracoon_tui.gpr
+
+# Install binary
+sudo cp bin/flatracoon_tui /usr/local/bin/flatracoon
+
+# Test
+flatracoon status
+flatracoon health
+----
+
+=== 4. Deploy Interface SDK
+
+The SDK is for programmatic access only:
+
+[source,bash]
+----
+cd interface
+
+# Build ReScript
+deno task build
+
+# Publish to registry (optional)
+deno publish
+
+# Or use locally
+deno run --allow-net examples/basic.res.js
+----
+
+== Configuration
+
+=== Orchestrator Module Registry
+
+Edit `orchestrator/config/modules.exs`:
+
+[source,elixir]
+----
+config :flatracoon_orchestrator, :modules, [
+  %{
+    name: "zerotier-k8s-link",
+    layer: :overlay,
+    deployment_mode: :kubectl,
+    manifest_path: "/path/to/zerotier-manifests",
+    namespace: "zerotier-system",
+    dependencies: []
+  },
+  %{
+    name: "twingate-helm-deploy",
+    layer: :access,
+    deployment_mode: :helm,
+    chart_path: "twingate/connector",
+    namespace: "twingate-system",
+    dependencies: ["zerotier-k8s-link"]
+  },
+  %{
+    name: "ipfs-overlay",
+    layer: :storage,
+    deployment_mode: :kubectl,
+    manifest_path: "/path/to/ipfs-manifests",
+    namespace: "ipfs-system",
+    dependencies: ["zerotier-k8s-link"]
+  }
+]
+----
+
+=== TUI Configuration
+
+The TUI reads from `~/.flatracoon/config`:
+
+[source,toml]
+----
+[orchestrator]
+url = "http://localhost:4000"
+timeout = 30
+
+[display]
+color = true
+unicode = true
+----
+
+== Monitoring & Operations
+
+=== Health Checks
+
+[source,bash]
+----
+# TUI
+flatracoon health
+
+# API
+curl http://localhost:4000/api/health
+
+# SDK
+deno run -A examples/health.ts
+----
+
+=== Viewing Logs
+
+[source,bash]
+----
+# TUI
+flatracoon logs zerotier-k8s-link --lines 100
+
+# API
+curl http://localhost:4000/api/logs/zerotier-k8s-link?lines=100
+
+# Kubernetes
+kubectl logs -n zerotier-system -l app=zerotier --tail=100
+----
+
+=== Deployment Operations
+
+[source,bash]
+----
+# Deploy all modules
+flatracoon deploy --all
+
+# Deploy specific module
+flatracoon deploy zerotier-k8s-link
+
+# Restart module
+flatracoon restart twingate-helm-deploy
+
+# Stop module
+flatracoon stop ipfs-overlay
+----
+
+== Troubleshooting
+
+=== Orchestrator Won't Start
+
+**Check dependencies:**
+[source,bash]
+----
+elixir --version  # Should be 1.16+
+mix --version
+pg_isready        # PostgreSQL should be running
+----
+
+**Check logs:**
+[source,bash]
+----
+journalctl -u flatracoon-orchestrator -f
+----
+
+=== TUI Cannot Connect
+
+**Verify orchestrator is running:**
+[source,bash]
+----
+curl http://localhost:4000/api/health
+----
+
+**Check firewall:**
+[source,bash]
+----
+sudo firewall-cmd --list-ports  # Should include 4000/tcp
+sudo firewall-cmd --add-port=4000/tcp --permanent
+----
+
+=== Module Deployment Fails
+
+**Check kubectl access:**
+[source,bash]
+----
+kubectl get nodes
+kubectl get namespaces
+----
+
+**Check Helm:**
+[source,bash]
+----
+helm list --all-namespaces
+----
+
+**Check module logs:**
+[source,bash]
+----
+flatracoon logs MODULE_NAME
+----
+
+== Production Considerations
+
+=== Security
+
+* **TLS:** Use reverse proxy (nginx/caddy) with TLS certificates
+* **Authentication:** Add auth middleware to orchestrator
+* **RBAC:** Configure Kubernetes RBAC for orchestrator service account
+* **Secrets:** Use sealed secrets or external secrets operator
+* **Network policies:** Restrict pod-to-pod communication
+
+=== High Availability
+
+* **Orchestrator:** Run multiple instances behind load balancer
+* **Database:** Use PostgreSQL replication (primary + replicas)
+* **Kubernetes:** Multi-node cluster with pod anti-affinity
+* **ZeroTier:** Multiple controllers for redundancy
+
+=== Monitoring
+
+* **Prometheus:** Collect metrics from ServiceMonitors
+* **Grafana:** Visualize stack health
+* **AlertManager:** Configure alerts for failures
+* **Loki:** Centralized log aggregation
+
+=== Backup & Recovery
+
+* **Database:** Regular pg_dump or WAL archiving
+* **IPFS:** Pin critical content to multiple nodes
+* **Kubernetes:** Velero for cluster backups
+* **Configuration:** Git repo with all manifests
+
+== Scaling
+
+=== Horizontal Scaling
+
+**IPFS nodes:**
+[source,bash]
+----
+kubectl scale statefulset ipfs -n ipfs-system --replicas=5
+----
+
+**Orchestrator instances:**
+[source,bash]
+----
+# Add more orchestrator nodes behind load balancer
+systemctl start flatracoon-orchestrator@2
+systemctl start flatracoon-orchestrator@3
+----
+
+=== Vertical Scaling
+
+Update resource requests/limits in manifests:
+
+[source,yaml]
+----
+resources:
+  requests:
+    memory: "4Gi"
+    cpu: "2000m"
+  limits:
+    memory: "8Gi"
+    cpu: "4000m"
+----
+
+== Upgrade Procedures
+
+=== Rolling Update
+
+[source,bash]
+----
+# Update orchestrator
+cd orchestrator
+git pull
+mix deps.get
+MIX_ENV=prod mix release --overwrite
+systemctl restart flatracoon-orchestrator
+
+# Update TUI
+cd tui
+git pull
+gprbuild -P flatracoon_tui.gpr
+sudo cp bin/flatracoon_tui /usr/local/bin/flatracoon
+
+# Update modules
+kubectl set image daemonset/zerotier zerotier=zerotier/zerotier:latest -n zerotier-system
+helm upgrade twingate-connector twingate/connector -n twingate-system
+kubectl apply -f ipfs-statefulset.yaml -n ipfs-system
+----
+
+== See Also
+
+* link:README.adoc[Main Documentation]
+* link:orchestrator/README.adoc[Orchestrator Guide]
+* link:tui/README.adoc[TUI Documentation]
+* link:interface/README.adoc[SDK Reference]
+* link:SECURITY.md[Security Policy]

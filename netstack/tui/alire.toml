@@ -1,0 +1,14 @@
+name = "flatracoon_tui"
+description = "FlatRacoon Network Stack TUI - Terminal user interface for orchestrator"
+version = "0.1.0"
+licenses = "MPL-2.0"
+authors = ["hyperpolymath"]
+maintainers = ["hyperpolymath@users.noreply.github.com"]
+maintainers-logins = ["hyperpolymath"]
+project-files = ["flatracoon_tui.gpr"]
+
+[gpr-externals]
+[gpr-set-externals]
+
+[[depends-on]]
+gnatcoll = "^25.0.0"

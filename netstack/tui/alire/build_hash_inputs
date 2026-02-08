@@ -1,0 +1,5 @@
+dependency:gnatcoll=25.0.0=02755e1b834aef38ef9fb72a4ed720b29ac424f527765424f9541328a6bb85af
+external:FLATRACOON_TUI_LIBRARY_TYPE=default
+external:LIBRARY_TYPE=default
+profile:flatracoon_tui=DEVELOPMENT
+switches:flatracoon_tui=-Og,-fdata-sections,-ffunction-sections,-g,-gnatVa,-gnatW8,-gnatw.X,-gnatwa,-gnaty-d,-gnaty3,-gnatyA,-gnatyB,-gnatyI,-gnatyO,-gnatyS,-gnatya,-gnatyb,-gnatyc,-gnatye,-gnatyf,-gnatyh,-gnatyi,-gnatyk,-gnatyl,-gnatym,-gnatyn,-gnatyp,-gnatyr,-gnatyt,-gnatyu,-gnatyx

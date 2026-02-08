@@ -1,0 +1,14 @@
+= flatracoon
+// SPDX-License-Identifier: PMPL-1.0-or-later
+:author: Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>
+
+Flatracoon operating system and networking stack.
+
+== Components
+
+* `netstack/` - Network stack implementation
+* `os/` - Operating system core
+
+== License
+
+PMPL-1.0-or-later

@@ -1,0 +1,31 @@
+{
+  "name": "@flatracoon/sdk",
+  "version": "0.1.0",
+  "exports": "./src/FlatRacoonClient.res.js",
+  "tasks": {
+    "build": "rescript build",
+    "clean": "rescript clean",
+    "watch": "rescript build -w",
+    "test": "deno test --allow-net tests/"
+  },
+  "compilerOptions": {
+    "lib": ["deno.ns", "deno.window"]
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 100,
+    "indentWidth": 2,
+    "semiColons": false,
+    "singleQuote": false,
+    "proseWrap": "preserve"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"],
+      "include": ["ban-untagged-todo"]
+    }
+  },
+  "imports": {
+    "@/": "./src/"
+  }
+}
