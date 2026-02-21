@@ -20,6 +20,9 @@ defmodule FlatracoonOrchestrator.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
+      # Application Entry Point:
+      # FlatracoonOrchestrator.Application manages the supervision tree for the orchestration service.
+      # extra_applications includes runtime_tools for observer/profiling support.
       mod: {FlatracoonOrchestrator.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
@@ -27,6 +30,7 @@ defmodule FlatracoonOrchestrator.MixProject do
 
   def cli do
     [
+      # Default to running tests when executing precommit tasks
       preferred_envs: [precommit: :test]
     ]
   end
@@ -40,12 +44,20 @@ defmodule FlatracoonOrchestrator.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      # WEB FRAMEWORK:
+      # Phoenix 1.8+ for the core web/API layer.
       {:phoenix, "~> 1.8.3"},
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
+      
+      # UI / REAL-TIME:
+      # LiveView for real-time orchestration dashboard updates via WebSockets.
       {:phoenix_live_view, "~> 1.1.0"},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
+      
+      # ASSET PIPELINE:
+      # esbuild and tailwind for frontend asset compilation.
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
       {:heroicons,
@@ -55,8 +67,13 @@ defmodule FlatracoonOrchestrator.MixProject do
        app: false,
        compile: false,
        depth: 1},
+      
+      # OBSERVABILITY:
+      # Telemetry for metrics and monitoring integration.
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
+      
+      # UTILS:
       {:gettext, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},

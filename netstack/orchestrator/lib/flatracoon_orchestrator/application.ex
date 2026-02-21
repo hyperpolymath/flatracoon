@@ -1,12 +1,23 @@
 defmodule FlatracoonOrchestrator.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
-  @moduledoc false
+  @moduledoc """
+  Entry point for the Flatracoon Orchestrator service.
+
+  This module defines the primary supervision tree for the orchestration engine, 
+  ensuring that critical services like the Module Registry and Health Monitor 
+  are started and restarted according to the specified strategy.
+  """
 
   use Application
 
   @impl true
   def start(_type, _args) do
+    # SUPERVISION TREE:
+    # 1. Telemetry: Gathers metrics for the orchestrator.
+    # 2. DNSCluster: Handles node discovery in a distributed cluster.
+    # 3. PubSub: Real-time messaging between orchestrator components.
+    # 4. ModuleRegistry: Authoritative store for FlatRacoon module state (.manifest.ncl).
+    # 5. HealthMonitor: Periodically checks health_endpoints of deployed modules.
+    # 6. Endpoint: Starts the Phoenix web server for the dashboard/API.
     children = [
       FlatracoonOrchestratorWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:flatracoon_orchestrator, :dns_cluster_query) || :ignore},
@@ -14,18 +25,16 @@ defmodule FlatracoonOrchestrator.Application do
       # FlatRacoon orchestrator services
       FlatracoonOrchestrator.ModuleRegistry,
       FlatracoonOrchestrator.HealthMonitor,
-      # Start to serve requests, typically the last entry
+      # Web / API Interface
       FlatracoonOrchestratorWeb.Endpoint
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
+    # STRATEGY: :one_for_one ensures that if a child process crashes, 
+    # only that process is restarted.
     opts = [strategy: :one_for_one, name: FlatracoonOrchestrator.Supervisor]
     Supervisor.start_link(children, opts)
   end
 
-  # Tell Phoenix to update the endpoint configuration
-  # whenever the application is updated.
   @impl true
   def config_change(changed, _new, removed) do
     FlatracoonOrchestratorWeb.Endpoint.config_change(changed, removed)
