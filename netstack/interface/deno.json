@@ -9,7 +9,10 @@
     "test": "deno test --allow-net tests/"
   },
   "compilerOptions": {
-    "lib": ["deno.ns", "deno.window"]
+    "lib": [
+      "deno.ns",
+      "deno.window"
+    ]
   },
   "fmt": {
     "useTabs": false,
@@ -21,11 +24,17 @@
   },
   "lint": {
     "rules": {
-      "tags": ["recommended"],
-      "include": ["ban-untagged-todo"]
+      "tags": [
+        "recommended"
+      ],
+      "include": [
+        "ban-untagged-todo"
+      ]
     }
   },
   "imports": {
-    "@/": "./src/"
+    "@/": "./src/",
+    "rescript": "^12.0.0",
+    "@rescript/core": "npm:@rescript/core@^1.6.1"
   }
 }
