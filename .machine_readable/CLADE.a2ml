@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Clade declaration — part of the gv-clade-index registry
+# See: https://github.com/hyperpolymath/gv-clade-index
+
+[identity]
+uuid = "57da3aa7-dcd9-554e-8278-810e0f99edaf"
+primary-forge = "github"
+primary-owner = "hyperpolymath"
+canonical-name = "flatracoon"
+prefixed-name = "dx-flatracoon"
+
+[clade]
+primary = "dx"
+secondary = []
+assigned = "2026-03-16"
+rationale = ""
+
+[forges]
+github = "hyperpolymath/flatracoon"
+gitlab = "hyperpolymath/flatracoon"
+bitbucket = "hyperpolymath/flatracoon"
+
+[lineage]
+type = "standalone"
+parent = "Flatpak tool"
+born = "2026-03-16"
