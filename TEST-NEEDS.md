@@ -1,5 +1,7 @@
 # CRG C Test Coverage — FlatRacoon Hesiod DNS Mapping
 
+## CRG Grade: C — ACHIEVED 2026-04-04
+
 **Date:** 2026-04-04  
 **Module:** `netstack/modules/hesiod-dns-map/crates/hesiod-lib/`  
 **Status:** COMPLETE — All CRG C requirements met
