@@ -1,22 +1,103 @@
 // SPDX-License-Identifier: PMPL-1.0-or-later
-= flatracoon — Show Me The Receipts
+// Copyright (c) 2026 Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+= FlatRacoon — Show Me The Receipts
 :toc:
 :icons: font
+:author: Jonathan D.A. Jewell
 
-The README makes claims. This file backs them up.
+The README makes claims. This file backs them up, traces the critical paths,
+and tells a reviewer exactly where to look.
+
+== Claim 1: Operating System and Networking Stack
 
 [quote, README]
 ____
 Flatracoon operating system and networking stack.
 ____
 
+*How it works:*
+FlatRacoon is a workspace of independent subsystems, each a self-contained module
+under `netstack/modules/`. The networking half (`netstack/`) holds crates for
+DNS (Hesiod), BGP labs, IPFS overlay, ZeroTier Kubernetes bridging, and an IPv6
+site enforcer. The OS half (`os/`) holds the FlatRacoon OS core, also in its own
+module layout with `src/`, `ffi/`, and presentation layers following the
+Idris2-ABI/Zig-FFI architecture standard.
+
+The entry point for DNS work is `netstack/modules/hesiod-dns-map/`, a Rust
+workspace that compiles to two binaries: `hesiod-lib` (the library) and
+`hesinfo` (the CLI query tool). `hesiod-lib/src/lib.rs` re-exports five
+sub-modules: `config`, `health`, `records`, `server`, and `zone` — providing
+HS-class TXT record management, a lightweight UDP DNS server, and HTTP
+health/metrics endpoints.
+
+*Honest caveat:*
+Most `os/` sub-modules and several `netstack/modules/` entries (e.g., `bgp-backbone-lab`,
+`poly-k8s-mcp`) are at early/stub stage. The DNS modules are further along;
+the broader OS layer is aspirational.
+
+== Claim 2: Hesiod DNS Naming System Support
+
+[quote, README]
+____
+See link:TOPOLOGY.md[TOPOLOGY.md] for a visual architecture map and completion dashboard.
+____
+
+*How it works:*
+`TOPOLOGY.md` at the repo root maps every module with a completion percentage.
+The Hesiod DNS module (`netstack/modules/hesiod-dns-map/`) implements RFC 1035
+HS-class (Hesiod class) TXT lookups. The library is `#![forbid(unsafe_code)]`
+and uses Tokio for async I/O. A `server.rs` provides a UDP listener; `zone.rs`
+manages zone file structures; `records.rs` holds the typed DNS record model;
+`health.rs` exposes an HTTP metrics endpoint used in FlatRacoon CI pipelines.
+
+Build path: `cargo build --release` in `netstack/modules/hesiod-dns-map/` →
+produces `hesinfo` (CLI) and `libhesiod` (library linked into OS components).
+
+*Honest caveat:*
+TSIG authentication and actual Hesiod NS delegation are documented in `PROOF-NEEDS.md`
+as not yet implemented. The server currently resolves statically configured zones
+only.
+
+== Dogfooded Across The Account
+
+[cols="2,3,1"]
+|===
+| Repo / System | How FlatRacoon is used | Status
+
+| `zerotier-k8s-link` (module) | ZeroTier overlay networking sits inside netstack | In-module
+| `ipfs-overlay` (module) | IPFS gateway module within the netstack | In-module
+| `hesiod-dns-map` (module) | DNS/Hesiod subsystem consumed by OS bootstrapper | In-module
+| `flatracoon-os` (module) | Core OS module referencing netstack services | In-module
+| CI/CD pipelines | `health.rs` HTTP endpoint pinged by Hypatia scanner | Planned
+|===
+
 == File Map
 
-[cols="1,2"]
+[cols="1,3"]
 |===
 | Path | What's There
 
-| `test(s)/` | Test suite
+| `netstack/` | Network stack top-level; Rust workspace root with `modules/`
+| `netstack/modules/hesiod-dns-map/` | Hesiod DNS library + `hesinfo` CLI (Rust workspace)
+| `netstack/modules/hesiod-dns-map/crates/hesiod-lib/src/lib.rs` | Library root; re-exports `config`, `health`, `records`, `server`, `zone`
+| `netstack/modules/hesiod-dns-map/crates/hesiod-lib/src/server.rs` | UDP DNS server implementation
+| `netstack/modules/hesiod-dns-map/crates/hesiod-lib/src/records.rs` | Typed DNS record model
+| `netstack/modules/hesiod-dns-map/crates/hesiod-lib/src/health.rs` | HTTP health/metrics endpoint
+| `netstack/modules/hesiod-dns-map/crates/hesiod-lib/src/zone.rs` | Zone file structure management
+| `netstack/modules/bgp-backbone-lab/` | BGP lab environment (early stage)
+| `netstack/modules/ipfs-overlay/` | IPFS overlay gateway module
+| `netstack/modules/zerotier-k8s-link/` | ZeroTier + Kubernetes bridging
+| `netstack/modules/ipv6-site-enforcer/` | IPv6 enforcement policy module
+| `netstack/modules/network-dashboard/` | Observability dashboard for the netstack
+| `os/` | FlatRacoon OS module; mirrored `src/`, `ffi/`, Idris2 ABI layout
+| `os/src/` | OS core source (Rust/Ada depending on subsystem)
+| `os/ffi/` | Zig FFI bridge (zero-logic pass-through)
+| `TOPOLOGY.md` | Architecture map and per-module completion percentages
+| `PROOF-NEEDS.md` | Formal verification backlog for this repo
+| `Justfile` | Build recipes: `just build`, `just test`, `just check`
+| `flake.nix` / `guix.scm` | Reproducible environment definitions
+| `contractiles/` | Contractile trust/dust/intend check files
+| `.machine_readable/` | A2ML state, meta, ecosystem, agentic manifests
 |===
 
 == Questions?
