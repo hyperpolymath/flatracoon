@@ -35,3 +35,15 @@ flatracoon_orchestrator-*.tar
 npm-debug.log
 /assets/node_modules/
 
+target/
+node_modules/
+_build/
+deps/
+.elixir_ls/
+.cache/
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+build/
+dist/
