@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Module Registry - Tracks all FlatRacoon stack components
 
 defmodule FlatracoonOrchestrator.ModuleRegistry do

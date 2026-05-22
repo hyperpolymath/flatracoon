@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 # Health Monitor - Aggregates health checks from all modules
 
 defmodule FlatracoonOrchestrator.HealthMonitor do

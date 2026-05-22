@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: PMPL-1.0-or-later
+# SPDX-License-Identifier: MPL-2.0
 defmodule FlatracoonOrchestrator.Integration.EndToEndTest do
   @moduledoc """
   End-to-end smoke tests simulating real-world usage flows.

@@ -142,7 +142,7 @@ Benchmarks: 9 targets compiled successfully (no run-time failures)
 
 All new test files include SPDX header:
 ```
-// SPDX-License-Identifier: PMPL-1.0-or-later
+// SPDX-License-Identifier: MPL-2.0
 ```
 
 ## Next Steps

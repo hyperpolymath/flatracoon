@@ -357,7 +357,7 @@ begin
 
 **Recommendation:**
 - Audit all source files
-- Replace AGPL with PMPL-1.0-or-later
+- Replace AGPL with MPL-2.0
 - Use MPL-2.0-or-later for Ada/SPARK if needed
 - Add license checker to CI
 
