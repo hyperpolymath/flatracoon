@@ -1,19 +1,67 @@
 = flatracoon
 // SPDX-License-Identifier: MPL-2.0
-:author: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
+:author: Jonathan D.A. Jewell <6759885+hyperpolymath@users.noreply.github.com>
+:revdate: 2026-05-26
 
-Flatracoon operating system and networking stack.
+Consolidated monorepo holding Flatracoon's operating-system and
+networking-stack components, plus the supporting CI / RSR scaffolding.
 
 == Components
 
-* `netstack/` - Network stack implementation
-* `os/` - Operating system core
+* `os/` — operating-system core. The bare-metal / userspace layer of the
+  Flatracoon OS proper.
+* `netstack/` — independent network stack implementation (sits above or
+  alongside `os/`).
 
-== License
+Each component is autonomous in its build, but they share licensing, CI,
+and the estate-wide governance bundle inherited from
+`hyperpolymath/standards`.
 
-MPL-2.0
+== Why a monorepo
 
+This repo was consolidated from previously-separate clones into a single
+monorepo to share CI / governance / dependency-version state across the
+two components. Each subdirectory still has its own `Justfile` /
+`Cargo.toml` / build entry points; the monorepo just collapses the
+operational overhead.
+
+== Quickstart
+
+[source,bash]
+----
+git clone git@github.com:hyperpolymath/flatracoon.git
+cd flatracoon
+
+# OS:
+cd os/
+just build && just test
+
+# Netstack:
+cd ../netstack/
+just build && just test
+----
 
 == Architecture
 
-See link:TOPOLOGY.md[TOPOLOGY.md] for a visual architecture map and completion dashboard.
+See link:TOPOLOGY.md[TOPOLOGY.md] for the visual architecture map and the
+component-by-component completion dashboard.
+
+== Status
+
+* **Licence**: MPL-2.0. See link:LICENSE[LICENSE]; `LICENSES/` carries the
+  full REUSE-compliant set.
+* **Estate role**: research / experimental — not yet a downstream
+  consumer of stable services.
+* **Audit findings**: see `docs/tech-debt-2026-05-26.md` if present
+  (added by the 2026-05-26 estate tech-debt scan).
+
+== Contributing
+
+See link:CONTRIBUTING.md[CONTRIBUTING.md]. All commits must be GPG-signed
+and follow conventional-commit conventions (estate-wide policy from
+`hyperpolymath/standards`).
+
+== Companion repositories
+
+* link:https://github.com/hyperpolymath/standards[`hyperpolymath/standards`] — canonical estate-wide standards.
+* link:https://github.com/hyperpolymath/rsr-template-repo[`hyperpolymath/rsr-template-repo`] — the RSR scaffold this repo follows.
