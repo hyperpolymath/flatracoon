@@ -14,6 +14,7 @@ jobs:
   orchestrator-test:
     name: Test Orchestrator
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: orchestrator
@@ -49,6 +50,7 @@ jobs:
   tui-build:
     name: Build TUI
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: tui
@@ -78,6 +80,7 @@ jobs:
   interface-build:
     name: Build Interface SDK
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: interface
@@ -105,6 +108,7 @@ jobs:
   integration-test:
     name: Integration Test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [orchestrator-test, tui-build, interface-build]
     steps:
       - name: Checkout
@@ -163,6 +167,7 @@ jobs:
   documentation:
     name: Validate Documentation
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
@@ -195,6 +200,7 @@ jobs:
   state-validation:
     name: Validate STATE Files
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4

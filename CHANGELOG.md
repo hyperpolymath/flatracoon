@@ -1,8 +1,7 @@
 <!--
 SPDX-License-Identifier: MPL-2.0
-SPDX-FileCopyrightText: 2026 Jonathan D.A. Jewell (hyperpolymath)
+Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 -->
-
 # Changelog
 
 All notable changes to `flatracoon` will be documented in this file.
@@ -41,7 +40,7 @@ this project aims to follow [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fix(ci): rsr-antipattern.yml duplicate heredoc (#7)
 - fix: set correct Groove capability type (was: custom)
 - fix(scorecard): enforce granular permissions and add fuzzing placeholder
-- fix: global AGPL-3.0-or-later → PMPL-1.0-or-later replacement
+- fix: global MPL-2.0 → MPL-2.0-or-later replacement
 - fix: SPDX headers (AGPL→PMPL), email, author name
 
 ### Changed
