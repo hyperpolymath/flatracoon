@@ -314,3 +314,6 @@ release:
     just tui-build
     just interface-build
     @echo "✓ Release artifacts built"
+
+secret-scan-trufflehog:
+    @command -v trufflehog >/dev/null && trufflehog filesystem . --only-verified || true
