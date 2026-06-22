@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: MPL-2.0
+# Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 # Dashboard LiveView - Real-time FlatRacoon stack monitoring
 
 defmodule FlatracoonOrchestratorWeb.DashboardLive do

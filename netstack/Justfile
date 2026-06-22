@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: MPL-2.0
+// Owner: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 # SPDX-FileCopyrightText: 2025 Hyperpolymath <hyperpolymath@proton.me>
 #
 # FlatRacoon Network Stack - Justfile
@@ -314,3 +315,6 @@ release:
     just tui-build
     just interface-build
     @echo "✓ Release artifacts built"
+
+secret-scan-trufflehog:
+    @command -v trufflehog >/dev/null && trufflehog filesystem . --only-verified || true
