@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "exports": "./src/FlatRacoonClient.res.js",
   "tasks": {
-    "build": "rescript build",
-    "clean": "rescript clean",
-    "watch": "rescript build -w",
+    "build": "deno run -A --node-modules-dir=auto npm:rescript build",
+    "clean": "deno run -A --node-modules-dir=auto npm:rescript clean",
+    "watch": "deno run -A --node-modules-dir=auto npm:rescript build -w",
     "test": "deno test --allow-net tests/"
   },
   "compilerOptions": {

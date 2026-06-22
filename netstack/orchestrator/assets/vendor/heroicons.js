@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MPL-2.0
+// Owner: Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 const plugin = require("tailwindcss/plugin")
 const fs = require("fs")
 const path = require("path")
