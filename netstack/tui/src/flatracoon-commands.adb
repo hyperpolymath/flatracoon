@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: MPL-2.0-or-later
+-- SPDX-License-Identifier: MPL-2.0
 -- FlatRacoon TUI - Command implementation
 
 with Ada.Text_IO; use Ada.Text_IO;

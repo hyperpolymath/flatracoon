@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: MPL-2.0-or-later
+-- SPDX-License-Identifier: MPL-2.0
 -- FlatRacoon TUI - API Client implementation
 -- Uses GNATCOLL.JSON for robust JSON parsing
 
