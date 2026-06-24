@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: MPL-2.0-or-later
+-- SPDX-License-Identifier: MPL-2.0
 -- FlatRacoon TUI - Display utilities
 
 package FlatRacoon.Display is

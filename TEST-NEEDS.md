@@ -1,5 +1,5 @@
 <!--
-SPDX-License-Identifier: MPL-2.0
+SPDX-License-Identifier: CC-BY-SA-4.0
 Copyright (c) Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>
 -->
 # CRG C Test Coverage — FlatRacoon Hesiod DNS Mapping
@@ -146,7 +146,7 @@ Benchmarks: 9 targets compiled successfully (no run-time failures)
 
 All new test files include SPDX header:
 ```
-// SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: CC-BY-SA-4.0
 ```
 
 ## Next Steps
