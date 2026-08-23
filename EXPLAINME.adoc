@@ -95,7 +95,7 @@ only.
 | `TOPOLOGY.md` | Architecture map and per-module completion percentages
 | `PROOF-NEEDS.md` | Formal verification backlog for this repo
 | `Justfile` | Build recipes: `just build`, `just test`, `just check`
-| `flake.nix` / `guix.scm` | Reproducible environment definitions
+| `flake.guix` / `guix.scm` | Reproducible environment definitions
 | `contractiles/` | Contractile trust/dust/intend check files
 | `.machine_readable/` | A2ML state, meta, ecosystem, agentic manifests
 |===

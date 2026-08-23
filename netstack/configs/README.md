@@ -66,7 +66,7 @@ Terminal UI client settings.
 
 ### interface
 
-ReScript SDK client settings.
+AffineScript SDK client settings.
 
 **Key settings:**
 - `interface.base_url`: API base URL

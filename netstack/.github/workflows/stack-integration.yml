@@ -76,9 +76,9 @@ jobs:
         uses: denoland/setup-deno@5fae568d37c87b099dcc8f9f8b9c09159be2da2d # v2
         with:
           deno-version: v1.x
-      - name: Install ReScript
-        run: deno install -A npm:rescript@11
-      - name: Build ReScript
+      - name: Install AffineScript
+        run: deno install -A npm:affinescript@11
+      - name: Build AffineScript
         run: deno task build || echo "Build task not critical for CI"
       - name: Lint
         run: deno lint

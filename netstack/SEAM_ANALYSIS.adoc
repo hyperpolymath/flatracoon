@@ -84,10 +84,10 @@ Character'Read (Channel, Char);
 
 ==== 🟡 Incomplete JSON Parsing
 
-**Issue:** ReScript client has placeholder JSON parsers.
+**Issue:** AffineScript client has placeholder JSON parsers.
 
 **Current State:**
-[source,rescript]
+[source,affinescript]
 ----
 | Ok(json) => {
     // Parse modules from JSON
@@ -99,7 +99,7 @@ Character'Read (Channel, Char);
 **Impact:** SDK returns empty arrays, not actual data.
 
 **Recommendation:**
-- Add `@rescript/core` JSON decoders
+- Add `@affinescript/core` JSON decoders
 - Implement proper response parsing
 - Add runtime type validation
 
@@ -112,7 +112,7 @@ Character'Read (Channel, Char);
 **Impact:** TS users lose type safety.
 
 **Recommendation:**
-- Generate TypeScript definitions from ReScript
+- Generate TypeScript definitions from AffineScript
 - Publish `@types/flatracoon-sdk` package
 - Add tsc validation to CI
 
@@ -507,7 +507,7 @@ The FlatRacoon Stack is **100% functionally complete** and ready for production 
 * ✓ Clean architecture with clear component boundaries
 * ✓ Comprehensive deployment documentation
 * ✓ Integration CI/CD pipeline
-* ✓ Type-safe implementations (Ada, ReScript, Elixir)
+* ✓ Type-safe implementations (Ada, AffineScript, Elixir)
 
 **Recommended Next Steps:**
 
