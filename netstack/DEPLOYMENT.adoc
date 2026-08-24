@@ -25,10 +25,10 @@ toc::[]
 * 100MB disk space
 * Linux, macOS, or Windows with GNAT
 
-**Interface SDK (Deno/ReScript):**
+**Interface SDK (Deno/AffineScript):**
 
 * Deno 1.40+
-* ReScript compiler
+* AffineScript compiler
 * Node.js 20+ (for build tools)
 
 **Kubernetes Cluster:**
@@ -195,7 +195,7 @@ The SDK is for programmatic access only:
 ----
 cd interface
 
-# Build ReScript
+# Build AffineScript
 deno task build
 
 # Publish to registry (optional)

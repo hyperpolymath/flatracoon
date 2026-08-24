@@ -122,11 +122,11 @@ end case;
 
 **Completed:** Previously (verified 2026-01-22)
 
-**Implementation:** Comprehensive ReScript JSON decoders already exist in `interface/src/FlatRacoonClient.res`
+**Implementation:** Comprehensive AffineScript JSON decoders already exist in `interface/src/FlatRacoonClient.res`
 
 **Evidence:**
 
-[source,rescript]
+[source,affinescript]
 ----
 module Decode = {
   let moduleInfo = (json: Js.Json.t): result<moduleInfo, string> => {
@@ -273,7 +273,7 @@ $ cd tui && alr build
 Success: Build finished successfully in 0.77 seconds.
 ✅ Success
 
-# Interface SDK (ReScript)
+# Interface SDK (AffineScript)
 $ cd interface && deno task build
 ✅ Success
 ----

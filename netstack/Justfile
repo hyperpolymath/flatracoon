@@ -71,14 +71,14 @@ tui-run:
     cd tui && ./bin/flatracoon-tui
 
 # =============================================================================
-# Interface (Deno/ReScript)
+# Interface (Deno/AffineScript)
 # =============================================================================
 
 # Install interface dependencies
 interface-deps:
     cd interface && deno cache src/main.ts
 
-# Build ReScript interface
+# Build AffineScript interface
 interface-build:
     cd interface && deno task build
 
